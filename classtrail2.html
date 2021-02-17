@@ -3,15 +3,43 @@
     <head>
         <title>d3.js data driven page</title>
         <script src="https://d3js.org/d3.v6.min.js"></script>
+        <style> 
+        .name{
+            color: red;
+            border: solid black 1pt;
+        }
+
+
+            .date {
+                color: green;
+            }
+            .date:hover
+            {
+                font-weight: bold;
+            }
+        </style>
     </head>
     <body>
         <p>This page is inspired by the <a href="https://observablehq.com/@d3/bar-chart-race" target="_blank"><b>Bar Chart Race</b></a> by <em>Mike Bostock</em> on the we site <a href="https://observablehq.com/">Observable</a>.</p>
         <button onclick="colorP()"> Click me</button>
+        <table></table>
 
 <script>
-    d3.csv("category-brands.csv", 
-     d => console.log(d)
-     
+    d3.csv("https://raw.githubusercontent.com/xavier414/Class-2-Example/main/category-brands.csv",
+     (d, i, c) => {
+         if (i<25) {
+        d3.select("table")
+            .append("tr")
+            .selectAll("td")
+            .data(c)
+            .enter()
+            .append("td")
+            .text(e => d[e])
+            .attr("class", e => e)
+      console.log(i)
+      console.log(c)
+     }
+    }
     )
 
         function colorP(){
