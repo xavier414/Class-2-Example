@@ -4,12 +4,14 @@
         <title>d3.js data driven page</title>
         <script src="https://d3js.org/d3.v6.min.js"></script>
         <style> 
-        .name{
+
+            th{
+                color: blue;
+            }
+            .name{
             color: red;
             border: solid black 1pt;
-        }
-
-
+            }
             .date {
                 color: green;
             }
@@ -22,30 +24,59 @@
     <body>
         <p>This page is inspired by the <a href="https://observablehq.com/@d3/bar-chart-race" target="_blank"><b>Bar Chart Race</b></a> by <em>Mike Bostock</em> on the we site <a href="https://observablehq.com/">Observable</a>.</p>
         <button onclick="colorP()"> Click me</button>
-        <table></table>
+        <div id="dateSelector"></div>   
+        <table>
+            <thead></thead>
+            <tbody></tbody>
+        </table>
 
 <script>
-    d3.csv("https://raw.githubusercontent.com/xavier414/Class-2-Example/main/category-brands.csv",
-     (d, i, c) => {
-         if (i<25) {
-        d3.select("table")
-            .append("tr")
-            .selectAll("td")
-            .data(c)
-            .enter()
-            .append("td")
-            .text(e => d[e])
-            .attr("class", e => e)
-      console.log(i)
-      console.log(c)
-     }
-    }
-    )
+      csv_url = false ? "category-brands.csv" : "https://raw.githubusercontent.com/xavier414/Class-2-Example/main/category-brands.csv",
+    d3.csv(csv_url).then(tidying)
 
+        function tidying(d) {
+            
+            data=d
+            dates = Array.from(new Set(data.map(e => e.date)))
+            dataSelector(dates)
+            makeHeader(d)
+            updateTable(d)
+    }
+    
+    function makeHeader(d) {
+            d3.select("table thead").selectAll("tr").remove()
+
+            d3.select("table thead")
+                .append("tr")
+                .selectAll("th")
+                .data(d.columns)
+                .join("th").text(e => e)}
+
+    function updateTable(d) {
+            d3.select("table tbody")
+                .selectAll("tr")
+                .data(d)
+                .join("tr")
+                .selectAll("td")
+                .data(e => d.columns.map(x => e[x]))
+                .join("td")
+                    .text(x => x);
+        }
+        function dataSelector(d) {
+            d3.select("#dataSelector")
+            .append("select")
+            .selectAll("option")
+            .data(d).enter()
+            .append("option")
+            .text(e => e.slice(0,4))
+            .attr("value", e => e)
+            console.log(d)
+    }
         function colorP(){
             alert("ok");
             d3.selectAll("p").style("color","red");
         }
 </script>
+</body>
         <p>We first download the data <b>category-brands.cvs</b> thas was given as an attachment to the Observable notebook, and save it as local</p>
 

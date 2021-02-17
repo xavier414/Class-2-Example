@@ -1,0 +1,144 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>d3.js data driven page</title>
+        <script src="https://d3js.org/d3.v6.min.js"></script>
+        <style> 
+
+            th{
+                color: blue;
+            }
+            .name{
+            color: red;
+            border: solid black 1pt;
+            }
+
+            #myCanvas{
+                background-color: grey;
+            }
+
+            .name:hover {
+
+
+            }
+            .date {
+                color: green;
+            }
+            .date:hover
+            {
+                font-weight: bold;
+            }
+        </style>
+    </head>
+    <body>
+        <p>This page is inspired by the <a href="https://observablehq.com/@d3/bar-chart-race" target="_blank"><b>Bar Chart Race</b></a> by <em>Mike Bostock</em> on the we site <a href="https://observablehq.com/">Observable</a>.</p>
+        <button onclick="colorP()"> Click me</button>
+        <div id="dataSelector"></div>   
+        <svg id="myCanvas" style="width:100%; height: 200px;"></svg>
+        <table>
+            <thead></thead>
+            <tbody></tbody>
+        </table>
+
+<script>
+    const cs = {
+
+    }
+
+
+    var data;
+    csv_url = false ? "category-brands.csv" : "https://raw.githubusercontent.com/xavier414/Class-2-Example/main/category-brands.csv",
+    d3.csv(csv_url).then(tidying)
+        var data, columns, maxValue;
+        function tidying(d) {
+            data=d
+            columns = d.columns
+            dates = Array.from(new Set(data.map(e => e.date)))
+            maxValue = d3.reduce(d, (p, v) => Math.max(p,v.value) , 0)
+            dataSelector(dates)
+
+            makeHeader(d)
+            updateTable(d)
+        }
+    
+        function makeHeader(d) {
+            d3.select("table thead").selectAll("tr").remove()
+
+            d3.select("table thead")
+                .append("tr")
+                .selectAll("th")
+                .data(columns)
+                .join("th").text(e => e)
+        }
+        
+
+         function updateTable(d) {
+            d3.select("table tbody")
+                .selectAll("tr")
+                .data(d)
+                .join("tr")
+                .selectAll("td")
+                .data(e => columns.map(x => e[x]))
+                .join("td")
+                    .text(x => x);
+        }
+        var columns;
+        function dataSelector(d) {
+            d3.select("#dataSelector")
+            .append("select")
+            .on("change", d=> updateSelect(d))
+            .selectAll("option")
+            .data(d).enter()
+            .append("option")
+            .text(e => e.slice(0,4))
+            .attr("value", e => e)
+        }
+
+
+        function updateSelect(e){
+            val = d3.select("select").node().value
+            fdata = d3.filter(data, e => e.date  == val)
+            fdata = fdata.slice(0,10);
+            updateTable(fdata)
+            updateChart(fdata)
+        }
+
+
+        function updateChart(data) {
+            
+                svg =  d3.select("#myCanvas");
+                w = svg.node().width.baseVal.value;
+                h = svg.node().height.baseVal.value;
+
+                x = d3.scaleLinear([0, data.length], [0, w])
+                y = d3.scaleLinear([0, maxValue], [0,h])
+
+                svgBind = svg.text("")
+                    .selectAll("rect")
+                    .data(data)
+
+                svgBind.enter()
+                    .append('rect')
+                    .attr('x', (d , i) => x(i))
+                    .attr('y', d => y(maxValue - d.value))
+                    .attr('height', d => y(d.value))
+                    .attr('width', x(1)*0.95)
+                    .attr('fill', "red")
+
+                svgBind.enter()
+                    .append("text")
+                    .attr('x', 0)
+                    .attr('y', 0)
+                    .attr('transform', 
+                        (d , i) => 'translate('+x(i+0.5)+','+y(maxValue - d.value - 5000)+')'+ 'rotate(-90)')
+                    .text(d => d.name);
+            }     
+
+        
+                        
+        function colorP(){
+            d3.selectAll("p").style("color","red");
+        }
+
+</script>
+</body>
